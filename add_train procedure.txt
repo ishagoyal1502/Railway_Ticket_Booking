@@ -1,0 +1,51 @@
+create or replace procedure add_train (
+train int,
+d date,
+no_ac int,
+no_sl int,
+out verdict varchar
+)
+language plpgsql
+as $$
+
+declare
+train_max int:=9999;
+train_min int=1000;
+train_info record;
+ac_seats int;
+sl_seats int;
+
+begin
+
+select * into train_info from train_stats
+where train_no=train and date=d;
+
+if(train_info is NULL) then
+
+if(train<train_min or train>train_max) then
+raise notice 'invalid train no';
+verdict = 'invalid train no';
+else
+ac_seats=18 * no_ac;
+sl_seats=24 * no_sl;
+
+insert into train_stats
+values(train,d,no_ac,no_sl,ac_seats,sl_seats);
+
+verdict = 'success';
+
+end if;
+
+else
+raise notice 'train already exists';
+verdict = 'train already exists';
+
+end if;
+end;
+$$;
+
+
+
+
+
+

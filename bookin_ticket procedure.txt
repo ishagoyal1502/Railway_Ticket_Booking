@@ -1,0 +1,127 @@
+create or replace procedure booking_ticket (
+train int,
+d date,
+coach_choice varchar(2),
+no_pass int,
+name text,
+out pnr_number varchar
+)
+language plpgsql
+as $$
+
+declare
+train_info record;
+i int:=1;
+pnr_val text:='';
+pass_name text;
+pass_berth_type varchar(2);
+pass_berth_num int;
+pass_coach text;
+temp1 int;
+temp2 int;
+temp3 text;
+booking_table text;
+names text[];
+begin 
+
+LOCK TABLE train_stats IN ROW EXCLUSIVE MODE;
+
+select string_to_array(name,' ') into names;
+
+select * into train_info from train_stats
+where train_no=train and date=d for update;
+
+raise notice '%',train_info;
+
+if(train_info is NULL) then
+raise notice 'train has not yet been launched for booking';
+pnr_val='no train';
+
+else
+booking_table= CONCAT( (train)::text,'_' ,(d)::text );
+execute format (
+'create table if not exists %I (
+pnr text,
+name text,
+coach text,
+berth_num int,
+berth_type  text,
+primary key (coach,berth_num) )', booking_table);
+
+
+if (coach_choice= 'AC' and train_info.ac_seats_avail >= no_pass) then
+raise notice 'AC seats available';
+
+while(i<=no_pass) 
+loop
+pass_name=names[i];
+temp1=(train_info.ac_coaches * 18) - (train_info.ac_seats_avail-i+1);
+temp2=(temp1 / 18)+1;
+temp3=(temp2)::text;
+pass_coach = CONCAT('AC',temp3);
+temp2=(temp1 % 18) +1;
+pass_berth_num=temp2;
+
+if(i=1) then
+pnr_val=CONCAT(booking_table,pass_coach,(pass_berth_num)::text);
+end if;
+
+select type into pass_berth_type from ac_composition
+where berth_num=pass_berth_num;
+
+execute format(
+' insert into %I (pnr,name,coach,berth_num,berth_type)
+values (%L,%L,%L,%L,%L)  ',booking_table,pnr_val, names[i],  pass_coach,pass_berth_num,pass_berth_type);
+
+i=i+1;
+end loop;
+
+update train_stats
+set ac_seats_avail=ac_seats_avail-no_pass
+where train_no=train and date=d ;
+
+elsif(coach_choice= 'SL' and train_info.sl_seats_avail>=no_pass) then
+raise notice 'SL seats available';
+
+while(i<=no_pass) 
+loop
+pass_name=names[i];
+temp1=(train_info.sl_coaches * 24) - (train_info.sl_seats_avail-i+1);
+temp2=(temp1 / 24)+1;
+temp3=(temp2)::text;
+pass_coach = CONCAT('SL',temp3);
+temp2=(temp1 % 24) +1;
+pass_berth_num=temp2;
+
+if(i=1) then
+pnr_val=CONCAT(booking_table,pass_coach,(pass_berth_num)::text);
+end if;
+
+select type into pass_berth_type from sl_composition
+where berth_num=pass_berth_num;
+
+execute format(
+' insert into %I (pnr,name,coach,berth_num,berth_type)
+values (%L,%L,%L,%L,%L) ',booking_table,pnr_val, names[i],  pass_coach,pass_berth_num,pass_berth_type);
+
+i=i+1;
+end loop;
+
+update train_stats
+set sl_seats_avail=sl_seats_avail-no_pass
+where train_no=train and date=d ;
+
+else
+raise notice 'seats not available';
+pnr_val='no seats';
+
+end if;
+end if;
+
+pnr_number=pnr_val;
+
+end;
+$$;
+
+
+

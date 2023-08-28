@@ -1,0 +1,65 @@
+create table train_stats(
+train_no int NOT NULL,
+date date NOT NULL,
+ac_coaches int,
+sl_coaches int,
+ac_seats_avail int,
+sl_seats_avail int,
+primary key (train_no,date));
+
+create table ac_composition(
+berth_num int NOT NULL,
+type varchar(2),
+primary key (berth_num));
+
+create table sl_composition(
+berth_num int NOT NULL,
+type varchar(2),
+primary key (berth_num));
+
+insert into ac_composition values(1, 'LB');
+insert into ac_composition values(2, 'LB');
+insert into ac_composition values(3, 'UB');
+insert into ac_composition values(4, 'UB');
+insert into ac_composition values(5, 'SL);
+insert into ac_composition values(6, 'SU);
+insert into ac_composition values(7, 'LB');
+insert into ac_composition values(8, 'LB');
+insert into ac_composition values(9, 'UB');
+insert into ac_composition values(10, 'UB');
+insert into ac_composition values(11, 'SL');
+insert into ac_composition values(12, 'SU');
+insert into ac_composition values(13, 'LB');
+insert into ac_composition values(14, 'LB');
+insert into ac_composition values(15, 'UB');
+insert into ac_composition values(16, 'UB');
+insert into ac_composition values(17, 'SL');
+insert into ac_composition values(18, 'SU');
+
+
+insert into sl_composition values(1, 'LB');
+insert into sl_composition values(2, 'MB');
+insert into sl_composition values(3, 'UB');
+insert into sl_composition values(4, 'LB');
+insert into sl_composition values(5, 'MB);
+insert into sl_composition values(6, 'UB);
+insert into sl_composition values(7, 'SL');
+insert into sl_composition values(8, 'SU');
+insert into sl_composition values(9, 'LB');
+insert into sl_composition values(10, 'MB');
+insert into sl_composition values(11, 'UB');
+insert into sl_composition values(12, 'LB');
+insert into sl_composition values(13, 'MB');
+insert into sl_composition values(14, 'UB');
+insert into sl_composition values(15, 'SL');
+insert into sl_composition values(16, 'SU');
+insert into sl_composition values(17, 'LB');
+insert into sl_composition values(18, 'MB');
+insert into sl_composition values(19, 'UB');
+insert into sl_composition values(20, 'LB');
+insert into sl_composition values(21, 'MB');
+insert into sl_composition values(22, 'UB');
+insert into sl_composition values(23, 'SL');
+insert into sl_composition values(24, 'SU');
+
+
